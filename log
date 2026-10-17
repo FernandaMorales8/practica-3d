@@ -1,0 +1,583 @@
+❯ Agregar una animacion al caer al mar, que parezca que se hunde. Que aparezca un mensaje con la cantidad de vidas restantes en la pantalla al reaparecer. Agrega items que puedan ser optenibles, por ejemplo un item que restaure alguna vida; esto hazlo modificando los mapas, hazlo como mejor lo consideres. Haz que no sea un trayecto tan lineal, que deba desviarse del camino principal para obtener objetos. Tengo instalado sqlite, crea la base de datos para la precistencia de la informacion, crea un leaderboard, en donde al inicio de la partida pongas un nickname, que registe tiempo, intentos hasta el mejor record y las estrellas y o objetos significativos optenidos; que sea visible, por ejemplo en la pantalla principal, modificala como mejor consideres,y que sea posible consultar esta informacion. Agrega cosas que creas que hayan con el concepto y tematica del juego.
+
+  Listed 1 directory
+
+A Godot project. Let me read the essentials.
+
+  Read 3 files, listed 3 directories, ran 4 shell commands
+
+Instalando el addon de SQLite para Godot (godot-sqlite) y un Godot 4.7.2 temporal para validar los scripts; luego modifico el juego.
+
+  Ran 1 shell command
+
+Copio solo los binarios de escritorio (Linux/Windows/macOS) al proyecto.
+
+  Ran 5 shell commands
+
+Primero verifico que el proyecto importa y que la extensión SQLite carga en Godot 4.7.2.
+
+  Ran 5 shell commands
+
+Ahora genero efectos de sonido nuevos (chapoteo, resorte, gema, corazón, poder) con el mismo formato que los existentes.
+
+  Ran 2 shell commands
+
+Ahora el módulo de base de datos.
+
+● Write(scripts/leaderboard_db.gd)
+Wrote 277 lines to scripts/leaderboard_db.gd
+# Persistencia en SQLite: jugadores, intentos por nivel y la tabla de records.
+#
+# Usa la extension godot-sqlite (res://addons/godot-sqlite). La clase SQLite
+# se crea con ClassDB y se llama de forma dinamica: si la extension no carga
+# (otra plataforma, binario ausente), el juego sigue funcionando y la tabla
+# de records se muestra como no disponible en lugar de romper el script.
+#
+# Modelo de datos:
+#   jugadores  - un nickname por fila (sin distinguir mayusculas).
+#   intentos   - cada partida de un nivel, termine como termine: completado,
+… +267 lines
+
+Ahora modifico los mapas: ramas laterales con objetos, resortes y bucles que regresan al camino principal.
+
+  Ran 1 shell command
+
+Ahora el constructor de niveles: objetos y resortes.
+
+  Ran 1 shell command
+
+● Write(scripts/spring_pad.gd)
+Wrote 46 lines to scripts/spring_pad.gd
+# Resorte: al pisarlo lanza al jugador hacia arriba.
+#
+# No usa body_entered: un jugador que se queda encima y vuelve a caer sobre el
+# muelle no "entra" de nuevo en el area. Se revisa en cada paso de fisica
+# quien esta dentro y se lanza solo si va hacia abajo o esta apoyado.
+extends Area3D
+
+signal bounced(node: Node)
+
+## Velocidad vertical del lanzamiento (m/s). Con gravedad 20 sube ~7 m.
+… +36 lines
+
+  Ran 1 shell command
+
+Limpio la indentación provisional de _collect.
+
+● Update(scripts/pickup.gd)
+Added 15 lines, removed 17 lines
+
+
+func _collect() -> void:
+  if true:
+    if true:
+      if _taken:
+        return
+      _taken = true
+      # No se puede cambiar la monitorizacion dentro del propio evento de
+      # colision: el motor lo bloquea y lanza error. Se difiere un paso.
+      set_deferred("monitoring", false)
+      collected.emit(kind, self)
+      if _visual != null:
+        var tween := create_tween()
+        tween.set_parallel(true)
+        tween.tween_property(_visual, "scale", Vector3.ZERO, 0.18)
+        tween.tween_property(_visual, "position:y", _visual.position.y + 0.6, 0.18)
+        tween.chain().tween_callback(queue_free)
+      else:
+        queue_free()
+  if _taken:
+    return
+  _taken = true
+  # No se puede cambiar la monitorizacion dentro del propio evento de
+  # colision: el motor lo bloquea y lanza error. Se difiere un paso.
+  set_deferred("monitoring", false)
+  collected.emit(kind, self)
+  if _visual != null:
+    var tween := create_tween()
+    tween.set_parallel(true)
+    tween.tween_property(_visual, "scale", Vector3.ZERO, 0.18)
+    tween.tween_property(_visual, "position:y", _visual.position.y + 0.6, 0.18)
+    tween.chain().tween_callback(queue_free)
+  else:
+    queue_free()
+
+
+# El checkpoint cambia de bandera roja a verde para que se lea a distancia.
+
+Cámara: que no baje bajo el agua mientras el personaje se hunde.
+
+  Ran 1 shell command
+
+Ahora el jugador: hundimiento, Super salto y resortes.
+
+  Ran 1 shell command
+
+Ahora la escena del HUD: temporizador, gema, Super salto, nickname y panel de records en la pantalla principal.
+
+  Ran 1 shell command
+
+● Write(scripts/gem_icon.gd)
+Wrote 42 lines to scripts/gem_icon.gd
+# Icono de la gema secreta del nivel, dibujado a mano como la estrella y los
+# corazones. Apagado hasta que se encuentra la gema.
+extends Control
+
+const FILL := Color(0.38, 0.82, 1, 1)
+const FACET := Color(0.75, 0.95, 1, 1)
+const FILL_EMPTY := Color(0.2, 0.22, 0.3, 0.55)
+const OUTLINE := Color(0.04, 0.18, 0.38, 0.95)
+const OUTLINE_WIDTH := 3.0
+… +32 lines
+
+Ahora hud.gd: nuevas funciones del HUD, tarjeta de vidas, overlay de agua y la tabla de records.
+
+  Ran 1 shell command
+
+● Update(scripts/hud.gd)
+Added 2 lines, removed 3 lines
+      _add_cell(_preview_rows, DB.format_time(int(r["tiempo_ms"])), color, 18)
+      _add_cell(_preview_rows, "%d/%d%s" % [int(r["estrellas"]), int(r["estrellas_total"]), "  +gema" if int(r["gema"]) == 1 else ""], color, 18)
+  if rows.is_empty():
+    for i in 4:
+      _add_cell(_preview_rows, "-" if i == 1 else "", DIM_TEXT, 18)
+    _welcome.text = _welcome.text if _welcome.text != "" else "Aun no hay records. ¡Se el primero!"
+    for text in ["", "Sin records aun", "", ""]:
+      _add_cell(_preview_rows, text, DIM_TEXT, 18)
+
+
+# --- Tabla de records completa -----------------------------------------------------
+
+Ahora main.gd: intentos, tiempo, objetos, base de datos y el flujo de nickname.
+
+  Searched for 1 pattern, read 1 file, ran 1 shell command
+
+Muevo el guardado del intento antes de la espera de celebración para que no se pierda si el jugador sale al menú en ese instante.
+
+  Ran 2 shell commands
+
+Los scripts compilan sin errores. Ahora una prueba de integración headless: nickname, caída al mar, objetos, resorte, meta y registro en la BD.
+
+  Ran 1 shell command
+
+Todo el flujo funciona. Verifico el hundimiento con detalle y que la geometría nueva no se solape.
+
+  Ran 1 shell command
+
+Ahora un bot que salta físicamente cada tramo nuevo (con el controlador real del jugador) para confirmar que las rutas son alcanzables y que las protegidas por Super salto no lo son sin él.
+
+  Ran 1 shell command
+
+Hay fallos; antes de cambiar el mapa necesito saber si son del bot o de la geometría. Calibro el bot con saltos originales del nivel 3 y registro dónde aterriza.
+
+  Ran 1 shell command
+
+El bot aterriza justo sobre el bloque destino y aun así cae a través, incluso en saltos originales. Lo investigo directamente.
+
+  Ran 2 shell commands
+
+El bot se pasa de largo (no frena en el aire como un jugador). Le doy control aéreo real: ajusta su velocidad horizontal según el tiempo que le queda hasta aterrizar.
+
+  Ran 1 shell command
+
+Casi todo pasa, pero quedan dos casos pendientes: el salto con Super salto hacia la gema del nivel 2 falla, y en el nivel 3 un tramo accesible sin Super salto no debería serlo (aunque la gema sigue protegida por el siguiente bloqueo). Voy a investigar el primer caso.
+
+  Ran 1 shell command
+
+Es un fallo del bot (soltaba el botón de salto en el mismo frame del salto, cortando el impulso). Lo corrijo y repito la batería completa.
+
+  Ran 1 shell command
+
+Las rutas se comportan como diseñé; los "FALLA" restantes son esperados (tramos bloqueados sin Super salto y destinos con resorte). Ahora verifico si hay pantalla disponible para ver la interfaz renderizada.
+
+  Searched for 1 pattern
+
+Abriré una ventana del juego unos segundos en tu escritorio para capturar pantallas y se cerrará sola.
+
+  Read 8 files, ran 1 shell command
+
+Se ve bien. Un detalle: la tarjeta de vidas puede quedar detrás del panel de victoria; la oculto al mostrar paneles.
+
+  Ran 1 shell command
+
+Ahora una herramienta de consulta por línea de comandos (Python trae sqlite3 incorporado; no tienes el CLI sqlite3 instalado, solo la librería).
+
+● Write(tools/leaderboard.py)
+Wrote 188 lines to tools/leaderboard.py
+#!/usr/bin/env python3
+"""Consulta la tabla de records de Aventura de Estrellas fuera del juego.
+
+La base la crea el juego en user://aventura.db. Uso:
+
+    python3 tools/leaderboard.py                     # top 10 de cada nivel y general
+    python3 tools/leaderboard.py nivel 2             # records del nivel 2
+    python3 tools/leaderboard.py nivel 2 --orden estrellas
+    python3 tools/leaderboard.py jugador Pablo       # records e historial de un jugador
+    python3 tools/leaderboard.py intentos --limite 30
+… +178 lines
+
+  Ran 1 shell command
+
+La herramienta funciona (y respeta solo-lectura). Limpio los datos de prueba y reviso qué archivos tocó el Godot temporal.
+
+  Ran 1 shell command
+
+Última pasada: repito la prueba de integración tras los ajustes finales y reviso advertencias del parser.
+
+  Ran 2 shell commands, wrote 1 memory
+
+Ya está todo implementado. Lo probé con un Godot 4.7.2 temporal en modo headless: los scripts compilan sin errores, hice una partida automatizada de principio a fin y un bot que salta físicamente cada tramo nuevo de los mapas. También saqué capturas de pantalla para revisar la interfaz. Lo único que no probé es el editor Summer Engine en sí.
+
+Caída al mar
+- Al tocar el agua salpica, el personaje frena, se balancea, suelta burbujas y se hunde despacio durante 1,6 s mientras la pantalla se tiñe de azul. La cámara se queda en la superficie mirando cómo desaparece. La vida se descuenta cuando termina de hundirse.
+- Al reaparecer sale una tarjeta con "Vidas restantes: N" y los corazones. Con la última vida dice "¡Última vida!".
+
+Objetos y mapas menos lineales
+- Corazón: da +1 vida, hasta un máximo de 5 (se empieza con 3).
+- Gema secreta: hay una por nivel. Tiene su propio indicador en el HUD y se guarda en el leaderboard.
+- Super salto: dura 12 s y permite saltar unos 4,5 m en vez de 2,5. Va con aura de partículas y una cuenta atrás en pantalla.
+- Resortes: te lanzan unos 7 m hacia arriba.
+- Ramas y bucles por nivel:
+  - Nivel 1: una estrella secreta detrás del punto de salida, una rama con resorte hasta la gema y un bucle con corazón que vuelve al camino principal.
+  - Nivel 2: el Super salto es la única forma de llegar a la gema, y la vuelta se salta la plataforma móvil. Además hay un resorte que lleva a un mirador con un corazón.
+  - Nivel 3: un desvío con corazón, una gema que solo se alcanza con Super salto y una "ruta del cielo" con resorte que se salta el ascensor.
+- El bot confirmó que todas las rutas se pueden recorrer y que las gemas no se alcanzan sin el Super salto o el resorte.
+
+Base de datos y leaderboard
+- Usé el addon godot-sqlite (addons/godot-sqlite, solo los binarios de Windows, Linux y macOS). La base se guarda en ~/.local/share/godot/app_userdata/IA/aventura.db.
+- Tablas: jugadores, intentos y la vista v_records. Se registra cada intento, sea completado, sin vidas o abandonado, con tiempo, estrellas, gema, corazones, caídas y medalla. El récord muestra en qué intento se consiguió (por ejemplo, "5 de 7").
+- Pantalla principal: hay que poner un nickname para jugar y se recuerda para la próxima vez. A la derecha aparece el top 5 por nivel o general, y las tarjetas de nivel muestran tu mejor marca.
+- "Ver tabla completa": pestañas Nivel 1/2/3, General y Mi historial, con búsqueda por jugador y orden por tiempo o por estrellas. También se abre desde el panel de victoria.
+- Panel de victoria: muestra tiempo, medalla, número de intento, si es nuevo récord personal y tu puesto.
+- Fuera del juego: python3 tools/leaderboard.py (opciones nivel 2, jugador Pablo, intentos, sql "..."). Solo lee, nunca modifica la base. Tienes la librería de SQLite pero no el comando sqlite3, por eso lo hice en Python.
+
+Otros añadidos: cronómetro en el HUD, medallas oro/plata/bronce según un tiempo par por nivel y cinco sonidos nuevos generados para el juego (chapoteo, resorte, corazón, gema y Super salto).
+
+Los tiempos par de las medallas (45, 55 y 75 s) son una estimación mía. Ajústalos en par_time dentro de scripts/level_data.gd cuando juegues tú mismo.
+
+Los cambios están sobre todo en scripts/main.gd, player.gd, hud.gd, level_data.gd y scenes/hud.tscn. Los archivos nuevos son scripts/leaderboard_db.gd, spring_pad.gd, gem_icon.gd y tools/leaderboard.py. Antes de empezar guardé una copia de los scripts y escenas originales en /tmp/claude-1000/-home-azki-ia/b5c4fab9-ffd8-49f4-910e-1ab882881659/scratchpad/backup, y borré los datos de prueba de la base.
+
+✻ Sautéed for 22m 59s · done viernes 8:50 p.m.
+
+❯  Genera nuevos mapas; agregarmos el modo contratiempo en estos. Haz que se genere esa sensacion de prisa usando las dinamicas, mecanicas y estetica del juego. Tambien, si no lo es, haz compatible el proyecto para publicarlo en una web de un repo de  github. y finalmente, haz que  la ventana del juego se vea bien en una ventana de 1080 x 920 o que sea dinamica.
+
+Es un cambio grande, así que primero reviso piezas clave: modelos para los nuevos objetos, tamaño de las plantillas de exportación web y cómo está montado el mar.
+
+  Ran 1 shell command
+
+Las plantillas son 1,3 GB; las descargo en segundo plano para probar la exportación web real mientras programo.
+
+  Ran 1 shell command
+
+Respaldo el estado actual antes de empezar.
+
+  Ran 1 shell command
+
+Scenery: agrupo mar y espuma en un nodo "Tide" para poder subir la marea.
+
+  Ran 1 shell command
+
+Nuevos sonidos: tic del reloj, cuenta atrás, ¡ya!, campana de tiempo extra, turbo, crujido, alarma y trueno.
+
+  Ran 1 shell command
+
+Ahora los dos mapas nuevos de contrarreloj en level_data.gd.
+
+  Ran 1 shell command
+
+Ahora las mecánicas nuevas: bloques que se derrumban y plataformas Turbo.
+
+● Write(scripts/crumble.gd)
+Wrote 81 lines to scripts/crumble.gd
+# Bloque que se rompe: al pisarlo tiembla un instante, cae al mar y vuelve a
+# aparecer unos segundos despues. Obliga a no quedarse quieto.
+#
+# Es un AnimatableBody3D: mientras tiembla sigue siendo suelo firme, y al
+# caer arrastra un momento al jugador antes de soltarlo.
+extends AnimatableBody3D
+
+signal crumbled(node: Node)
+
+@export var delay := 0.5
+… +71 lines
+
+● Write(scripts/boost_pad.gd)
+Wrote 27 lines to scripts/boost_pad.gd
+# Plataforma Turbo: al pisar la flecha el jugador sale disparado hacia
+# delante (-Z del bloque) con mas velocidad durante un momento.
+extends Area3D
+
+signal boosted(node: Node)
+
+@export var duration := 1.8
+
+var _cooldown := 0.0
+… +17 lines
+
+● Background command "cd /tmp/claude-1000/-home-azki-ia/b5c4fab9-ffd8-49f4-910e-1ab882881659/scratchpad/dl && curl -sL -o templates.tpz https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz && ls -la templates.tpz" completed (exit code 0)
+
+Plantillas descargadas. Ahora el constructor de niveles: bloques que se rompen, Turbo, aros de tiempo y rotación opcional.
+
+  Ran 1 shell command
+
+Jugador: Turbo y su estela.
+
+  Ran 1 shell command
+
+Base de datos: nuevo resultado "sin tiempo" con migración del esquema (la tabla tenía un CHECK que no lo admitía).
+
+  Ran 1 shell command
+
+Cámara: FOV adaptable al tamaño de ventana, efecto de velocidad con Turbo y lluvia.
+
+  Ran 1 shell command
+
+Ahora el HUD. Reviso las partes que voy a tocar.
+
+  Searched for 1 pattern, read 2 files, ran 2 shell commands
+
+Ahora main.gd, la lógica del contrarreloj.
+
+  Ran 1 shell command
+
+Configuración de ventana: base 1152×864, ventana inicial 1080×920 y redimensionable.
+
+  Ran 1 shell command
+
+Compilo e importo para detectar errores.
+
+  Ran 2 shell commands
+
+Compila. Ahora pruebo la migración: creo una base con el esquema antiguo (v1) y datos, y dejo que el juego la abra.
+
+  Ran 1 shell command
+
+La migración de prueba conservó tus datos reales y validó el proceso, pero añadió filas "Tester" que no deberían estar. Voy a hacer una copia de seguridad y eliminar esas filas añadidas.
+
+  Ran 1 shell command
+
+Restauro tus datos: borro el jugador "Tester" y sus intentos, y devuelvo el nickname a "ClaudiaSheimbaum", que fue el último que jugó.
+
+  Ran 1 shell command
+
+Voy a ejecutar un bot que recorre los mapas de contrarreloj de forma continua, sin teletransportarse entre saltos, para medir el tiempo real y ajustar los límites, usando safe_run.sh con tus datos apartados.
+
+  Ran 2 shell commands
+
+Otro fallo del bot (soltaba el salto en el mismo frame). Lo corrijo.
+
+  Ran 2 shell commands
+
+Encontré un problema real de diseño: a 12,5 m/s el Turbo hace que el salto siguiente se pase de la plataforma 2×2 sin tiempo de frenar en el aire. Voy a rediseñar con plataformas flecha 4×4 y, tras cada Turbo, un salto que solo se cruza con el impulso hacia una plataforma 6×6 de aterrizaje.
+
+  Ran 1 shell command
+
+Actualizo las rutas del bot al nuevo diseño y vuelvo a medir.
+
+  Ran 1 shell command
+
+Marea Alta completa: el bot la termina en 19,3 s y le sobran 21,7 s, demasiado holgado. Lo ajustaré. Antes investigo el fallo de Tormenta al saltar desde la plataforma móvil.
+
+  Ran 1 shell command
+
+Otra vez el bot: dejaba pulsado "adelante" al terminar un salto. Lo corrijo.
+
+  Ran 2 shell commands
+
+Ambos contrarreloj completados. Ahora ajustaré la dificultad para que un bot experto termine con 9-12 s de margen, dejando espacio para humanos más lentos y posibles caídas (3 s cada una).
+
+  Ran 1 shell command
+
+Ambos niveles se completan con el margen buscado. Ahora repito las pruebas funcionales (tiempo agotado, caídas, meta, migración) y la regresión de la aventura, todo con tus datos apartados.
+
+  Ran 1 shell command
+
+Todo funciona y tus datos siguen intactos (10 intentos, 3 jugadores). Reviso una carpeta [unnamed project] que apareció.
+
+  Listed 1 directory
+
+Ahora la exportación web. Extraigo solo las plantillas web a un directorio de datos aislado del scratchpad (con XDG_DATA_HOME), así no toco tu sistema.
+
+  Ran 1 shell command
+
+Creo el preset de exportación web (sin hilos, para que funcione en GitHub Pages sin cabeceras especiales, y con soporte de extensiones para que cargue SQLite).
+
+● Write(export_presets.cfg)
+Wrote 38 lines to export_presets.cfg
+[preset.0]
+
+name="Web"
+platform="Web"
+runnable=true
+advanced_options=false
+dedicated_server=false
+custom_features=""
+export_filter="all_resources"
+include_filter=""
+… +28 lines
+
+  Ran 1 shell command
+
+Exportado (incluye libgdsqlite…wasm). Lo sirvo en localhost y lo abro en Brave headless para ver si arranca y si SQLite funciona en el navegador.
+
+  Ran 2 shell commands
+
+Uso Node 22 (trae WebSocket) para controlar Brave por CDP: leer la consola, interactuar y capturar pantalla.
+
+  Read 1 file, ran 1 shell command
+
+La versión web arranca correctamente con SQLite cargado y "Salir" oculto. Voy a corregir dos detalles: un error de captura del puntero al arrancar sin gesto del usuario, y las tarjetas de contrarreloj que perdían bordes redondeados por leer el estilo antes de entrar al árbol.
+
+  Read 3 files, ran 1 shell command
+
+Encontré dos problemas: el texto insertado por CDP no llega a Godot, así que lo enviaré como teclas reales, y el error de captura persiste porque _start_level captura el ratón al construir el nivel de fondo del menú. Voy a corregir ambos.
+
+  Searched for 1 pattern, ran 1 shell command
+
+Los mensajes duplicados venían de un Brave headless anterior que seguía vivo (kill solo cerraba el script lanzador). Cierro esos procesos, solo los que usan mi perfil de pruebas, y repito.
+
+  Read 3 files, ran 2 shell commands
+
+La versión web funciona bien: cuenta atrás, Turbo con líneas de velocidad, apertura de cámara y pausa. Ahora corrijo un solapamiento de textos en el "3, 2, 1" y verifico que los datos persistan al recargar la página.
+
+  Read 2 files, ran 1 shell command
+
+Tras recargar, el nickname "webtester" se conservó. Compruebo que el intento abandonado también quedó guardado (pestaña Mi historial).
+
+  Read 1 file, ran 1 shell command
+
+Encontré la causa: SQLite escribe en el sistema de archivos de Emscripten, pero Godot solo sincroniza con IndexedDB al cerrar un archivo propio, por eso el intento no sobrevivía a la recarga aunque el nickname sí. Voy a forzar la sincronización escribiendo un archivo pequeño con FileAccess después de cada guardado.
+
+  Read 1 file, ran 1 shell command
+
+Sigue vacío. Antes de seguir, compruebo si el intento se guarda dentro de la misma sesión, sin recargar.
+
+  Read 1 file, ran 1 shell command
+
+El cronómetro muestra 0:00.12: con el renderizado por software del navegador headless la intro tardó más y el intento duró menos de 1 s, el mínimo para guardarse. Repito con esperas más largas.
+
+  Read 2 files, ran 1 shell command
+
+Con 2,88 s tampoco se guardó, ni siquiera dentro de la sesión, así que el problema es la escritura en sí en la web. Añado trazas temporales para ver qué devuelve SQLite en el navegador.
+
+  Ran 1 shell command
+
+La inserción funciona en la web. Miro la captura de esa ejecución anterior para ver si el problema estaba en la consulta del historial.
+
+  Read 1 file
+
+Dentro de la sesión se guarda bien; lo que falla es la persistencia al recargar. Inspecciono lo que realmente quedó en IndexedDB tras el guardado.
+
+  Ran 1 shell command
+
+La copia en IndexedDB no se actualizó tras la inserción, probablemente porque SQLite mantiene datos en buffer con la conexión abierta. Probaré cerrar la base antes de sincronizar y reabrirla después, enfoque que no llegué a validar bien en el intento anterior.
+
+  Ran 1 shell command
+
+La copia en IndexedDB no refleja la fila nueva porque el navegador no detecta los cambios escritos por SQLite. Voy a reescribir la base con FileAccess de Godot tras cerrarla (unos 30 KB), lo que debería actualizar la marca de tiempo y disparar la sincronización.
+
+  Ran 1 shell command
+
+Sigue sin persistir. Compruebo desde el propio juego qué bytes tiene el archivo de la base en el momento del volcado.
+
+  Ran 1 shell command
+
+El archivo en memoria sí tiene la fila y la reescritura funciona. Antes de seguir, reviso la captura tras recargar de la ejecución anterior, que no llegué a mirar.
+
+  Read 1 file
+
+La fila está en el archivo en memoria pero no llega a IndexedDB. Compruebo si la fecha de modificación del archivo cambia al reescribirlo, porque de eso depende la sincronización.
+
+  Ran 1 shell command
+
+La fecha del archivo sí cambia en cada escritura, pero IndexedDB se quedó con la versión del primer volcado. Compruebo si la sincronización solo tarda o si deja de ocurrir.
+
+  Ran 1 shell command
+
+La sincronización sí ocurre, solo con retraso (confirmado a los 19 s, no a los 4 s), así que mis recargas previas eran demasiado rápidas. Dejo la versión sin trazas basada en el archivo marcador y la verifico recargando tras una espera realista.
+
+  Read 1 file, ran 1 shell command
+
+La persistencia web quedó confirmada tras recargar. Ahora capturo en escritorio, a 1080×920, la estética de prisa: tormenta con lluvia, cuenta atrás en zona roja y el texto "+3 s", abriendo una ventana unos segundos con tus datos apartados.
+
+  Read 4 files, ran 1 shell command
+
+Todo quedó como esperaba a 1080×920. Ahora pasaré a publicar en GitHub, empezando por verificar que ningún archivo supere el límite de 100 MB antes de preparar el workflow, .gitignore y README.
+
+  Listed 1 directory, ran 1 shell command
+
+Simulo el workflow sobre un clon limpio (sin la caché .godot, como en GitHub) con un HOME temporal, para asegurar que importa y exporta desde cero.
+
+  Ran 1 shell command
+
+El clon limpio importa y exporta sin errores. Actualizo la herramienta de consulta para 5 niveles y escribo el README.
+
+  Ran 1 shell command
+
+● Write(README.md)
+Wrote 69 lines to README.md
+# Aventura de Estrellas
+
+Plataformas 3D hecho con Godot 4.7 (renderer Compatibility). Corre por islas
+sobre el mar, recoge estrellas, busca la gema secreta de cada nivel y no te
+caigas al agua.
+
+## Modos
+
+- **Aventura (niveles 1-3):** Prado Verde, Cañón Azul y Torre Roja. Tres vidas
+  (hasta cinco con corazones), una gema secreta por nivel, Super salto y
+… +59 lines
+
+  Ran 3 shell commands
+
+Ya están los dos mapas de contrarreloj, el juego se puede publicar en GitHub Pages y la ventana se abre a 1080×920 y se adapta a cualquier tamaño. Lo probé con un Godot 4.7.2 temporal y con un bot que juega físicamente. La versión web la exporté y la probé en un navegador. No lo abrí en Summer Engine.
+
+Contrarreloj (niveles 4 y 5: "Marea Alta" y "Tormenta")
+
+Aparecen en una fila de tarjetas rojizas en el menú.
+
+- Reloj y marea: empieza con "3, 2, 1, ¡YA!" y una cuenta atrás. Mientras corre el reloj la marea sube, y baja si ganas segundos. Al llegar a 0 sube de golpe y el personaje se hunde con la animación que ya existía.
+- Tiempo extra y penalizaciones:
+  - Los aros verdes dan +3 s.
+  - Los checkpoints también suman tiempo.
+  - No hay vidas: cada caída resta 3 s.
+- Mecánicas nuevas:
+  - Bloques rojos que se rompen poco después de pisarlos.
+  - Flechas de Turbo con líneas de velocidad y la cámara abriéndose, que llevan a "saltos turbo": huecos que solo se cruzan con el impulso.
+  - Un atajo con resorte en Tormenta para no esperar el ascensor.
+- Sensación de prisa: con menos de 10 s suena un tic-tac, la música se acelera, los números pasan a naranja y luego a rojo, y los bordes de la pantalla laten en rojo. Tormenta añade lluvia, relámpagos y truenos.
+- Equilibrio: un bot que no falla termina con unos 12 s de sobra en Marea Alta y unos 9 s en Tormenta. Así queda margen para una persona y alguna caída, aunque falta que lo pruebes tú. El límite está en time_limit dentro de scripts/level_data.gd.
+- Corrección de diseño: el bot detectó que el Turbo hacía pasarse de largo las plataformas pequeñas. Lo rediseñé para que tras cada Turbo se aterrice en una plataforma grande.
+- Leaderboard: los niveles 4 y 5 tienen sus propias pestañas ("Reloj 1" y "Reloj 2") y un nuevo resultado, "Sin tiempo".
+
+Tus datos. Durante las pruebas noté que ya tenías partidas guardadas (ClaudiaSheimbaum, RashoMcQueen). Una prueba mía se ejecutó sobre esa base:
+- La migró al esquema nuevo conservando todos los datos.
+- Añadió un jugador "Tester" y puso "Tester" como nickname guardado.
+
+Borré ese jugador y devolví el nickname a "ClaudiaSheimbaum". Tus 10 intentos siguen intactos. Desde entonces todas las pruebas usaron una copia aparte.
+
+Publicar en GitHub Pages
+- Añadí export_presets.cfg (preset "Web"), el workflow .github/workflows/publicar-web.yml y un README.md con los pasos. Lo único que tienes que hacer en GitHub es ir a Settings > Pages > Source y elegir GitHub Actions. Después, cada push a main (o master) publica el juego.
+- La exportación va sin hilos, porque GitHub Pages no permite las cabeceras que exigen, y con soporte de extensiones, que necesita SQLite. Para ello añadí al addon sus binarios web.
+- Simulé el workflow sobre un clon limpio del proyecto y exporta sin errores.
+- En el navegador funcionan la carga, el menú, SQLite, el contrarreloj y la pausa.
+- Arreglé dos fallos que solo aparecían en la web:
+  - El ratón se intentaba capturar antes de que el jugador hiciera clic, lo que daba error.
+  - Los récords se perdían al recargar la página. Ahora se guardan, aunque la copia al almacenamiento del navegador tarda unos segundos. Si alguien cierra la pestaña justo al terminar un nivel, ese último intento podría perderse.
+- En la web el botón "Salir" se oculta, y si se suelta el ratón con Esc el juego se pausa solo.
+
+Ventana
+- Se abre a 1080×920, se puede redimensionar y la interfaz se escala sin deformarse.
+- En ventanas altas o estrechas la cámara amplía el campo de visión para que no parezca que hace zoom.
+- Lo comprobé con capturas reales a 1080×920.
+
+Los archivos nuevos son scripts/crumble.gd, scripts/boost_pad.gd, scenes/levels/level_04.tscn y level_05.tscn, ocho efectos de sonido y los de publicación (export_presets.cfg, el workflow y el README.md). Los cambios principales están en main.gd, hud.gd, level_data.gd, camera_rig.gd y player.gd.
+
+✻ Worked for 48m 20s · done viernes 11:33 p.m.
+
+※ recap: Ya están los dos niveles de contrarreloj, la publicación web en GitHub Pages y la ventana a 1080×920, todo probado. Siguiente paso: subir el proyecto a GitHub y elegir Settings > Pages > Source: GitHub Actions. (disable recaps in /config)
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ⏵⏵ auto mode on (shift+tab to cycle)
