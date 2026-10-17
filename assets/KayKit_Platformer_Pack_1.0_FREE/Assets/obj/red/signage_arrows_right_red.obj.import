@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://ci185qr2wbx62"
+path="res://.godot/imported/signage_arrows_right_red.obj-4cb18a2c24c68ca0b86fb97b81d1226f.mesh"
+
+[deps]
+
+files=["res://.godot/imported/signage_arrows_right_red.obj-4cb18a2c24c68ca0b86fb97b81d1226f.mesh"]
+
+source_file="res://assets/KayKit_Platformer_Pack_1.0_FREE/Assets/obj/red/signage_arrows_right_red.obj"
+dest_files=["res://.godot/imported/signage_arrows_right_red.obj-4cb18a2c24c68ca0b86fb97b81d1226f.mesh", "res://.godot/imported/signage_arrows_right_red.obj-4cb18a2c24c68ca0b86fb97b81d1226f.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

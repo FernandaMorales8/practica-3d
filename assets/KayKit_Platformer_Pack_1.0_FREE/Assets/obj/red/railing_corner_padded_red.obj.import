@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bvjrmh2f1te71"
+path="res://.godot/imported/railing_corner_padded_red.obj-5a02f5977c9ef21265671be9f27b5f50.mesh"
+
+[deps]
+
+files=["res://.godot/imported/railing_corner_padded_red.obj-5a02f5977c9ef21265671be9f27b5f50.mesh"]
+
+source_file="res://assets/KayKit_Platformer_Pack_1.0_FREE/Assets/obj/red/railing_corner_padded_red.obj"
+dest_files=["res://.godot/imported/railing_corner_padded_red.obj-5a02f5977c9ef21265671be9f27b5f50.mesh", "res://.godot/imported/railing_corner_padded_red.obj-5a02f5977c9ef21265671be9f27b5f50.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

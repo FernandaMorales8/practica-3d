@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dot14ktnq5dpa"
+path="res://.godot/imported/railing_straight_double_blue.obj-e036974425b4a4aca6d343b79d27f84a.mesh"
+
+[deps]
+
+files=["res://.godot/imported/railing_straight_double_blue.obj-e036974425b4a4aca6d343b79d27f84a.mesh"]
+
+source_file="res://assets/KayKit_Platformer_Pack_1.0_FREE/Assets/obj/blue/railing_straight_double_blue.obj"
+dest_files=["res://.godot/imported/railing_straight_double_blue.obj-e036974425b4a4aca6d343b79d27f84a.mesh", "res://.godot/imported/railing_straight_double_blue.obj-e036974425b4a4aca6d343b79d27f84a.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

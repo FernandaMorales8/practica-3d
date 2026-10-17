@@ -1,0 +1,386 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
+[ext_resource type="Theme" path="res://ui/theme.tres" id="2_theme"]
+[ext_resource type="Script" path="res://scripts/star_icon.gd" id="3_star"]
+[ext_resource type="Script" path="res://scripts/gem_icon.gd" id="4_gem"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="Root" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme = ExtResource("2_theme")
+
+[node name="TopPill" type="PanelContainer" parent="Root"]
+offset_left = 24.0
+offset_top = 16.0
+offset_right = 24.0
+offset_bottom = 16.0
+mouse_filter = 2
+theme_type_variation = &"HudPill"
+
+[node name="TopBar" type="HBoxContainer" parent="Root/TopPill"]
+layout_mode = 2
+theme_override_constants/separation = 28
+
+[node name="LevelLabel" type="Label" parent="Root/TopPill/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.16, 0.3, 0.9)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 26
+text = "Nivel 1/3"
+
+[node name="Stars" type="HBoxContainer" parent="Root/TopPill/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="StarIcon" type="Control" parent="Root/TopPill/TopBar/Stars"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("3_star")
+
+[node name="StarLabel" type="Label" parent="Root/TopPill/TopBar/Stars"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.94, 0.55, 1)
+theme_override_colors/font_outline_color = Color(0.3, 0.2, 0.02, 0.9)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 26
+text = "0 / 0"
+
+[node name="Gems" type="HBoxContainer" parent="Root/TopPill/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="GemIcon" type="Control" parent="Root/TopPill/TopBar/Gems"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("4_gem")
+
+[node name="Hearts" type="HBoxContainer" parent="Root/TopPill/TopBar"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TimeLabel" type="Label" parent="Root/TopPill/TopBar"]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.94, 1, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.12, 0.3, 0.9)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 26
+text = "0:00.00"
+horizontal_alignment = 2
+
+[node name="PowerLabel" type="Label" parent="Root"]
+visible = false
+offset_left = 28.0
+offset_top = 76.0
+offset_right = 360.0
+offset_bottom = 110.0
+theme_override_colors/font_color = Color(0.78, 1, 0.45, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.25, 0.04, 0.95)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 24
+text = "Super salto 10"
+
+[node name="Message" type="Label" parent="Root"]
+anchor_right = 1.0
+offset_top = 108.0
+offset_bottom = 162.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.16, 0.3, 0.9)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 34
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Hint" type="Label" parent="Root"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -48.0
+offset_bottom = -18.0
+theme_override_colors/font_color = Color(1, 1, 1, 0.92)
+theme_override_colors/font_outline_color = Color(0.1, 0.16, 0.3, 0.9)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 20
+text = ""
+horizontal_alignment = 1
+
+[node name="PauseButton" type="Button" parent="Root"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -164.0
+offset_top = 16.0
+offset_right = -24.0
+offset_bottom = 60.0
+focus_mode = 0
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 22
+text = "II  Pausa (P)"
+
+[node name="Dim" type="ColorRect" parent="Root"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.03, 0.05, 0.13, 0.55)
+
+[node name="PausePanel" type="Panel" parent="Root"]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -160.0
+offset_right = 200.0
+offset_bottom = 160.0
+
+[node name="Box" type="VBoxContainer" parent="Root/PausePanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 24.0
+offset_right = -40.0
+offset_bottom = -24.0
+alignment = 1
+theme_override_constants/separation = 14
+
+[node name="PauseLabel" type="Label" parent="Root/PausePanel/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.94, 0.55, 1)
+theme_override_colors/font_outline_color = Color(0.3, 0.2, 0.02, 0.9)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 44
+text = "PAUSA"
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="Root/PausePanel/Box"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Continuar"
+
+[node name="RestartButton" type="Button" parent="Root/PausePanel/Box"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 24
+text = "Reiniciar nivel"
+
+[node name="MenuButton" type="Button" parent="Root/PausePanel/Box"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 24
+text = "Menu de inicio"
+
+[node name="StartScreen" type="ColorRect" parent="Root"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.06, 0.1, 0.22, 0.72)
+
+[node name="Columns" type="HBoxContainer" parent="Root/StartScreen"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -555.0
+offset_top = -400.0
+offset_right = 555.0
+offset_bottom = 400.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+theme_override_constants/separation = 26
+
+[node name="Box" type="VBoxContainer" parent="Root/StartScreen/Columns"]
+custom_minimum_size = Vector2(620, 0)
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Root/StartScreen/Columns/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.94, 0.55, 1)
+theme_override_colors/font_outline_color = Color(0.3, 0.2, 0.02, 0.9)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 50
+text = "AVENTURA DE ESTRELLAS"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Root/StartScreen/Columns/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.16, 0.3, 0.9)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 22
+text = "Recoge estrellas, busca la gema secreta de cada nivel y no caigas al mar"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="NickRow" type="HBoxContainer" parent="Root/StartScreen/Columns/Box"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="NickLabel" type="Label" parent="Root/StartScreen/Columns/Box/NickRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Nickname:"
+
+[node name="NickEdit" type="LineEdit" parent="Root/StartScreen/Columns/Box/NickRow"]
+custom_minimum_size = Vector2(280, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+placeholder_text = "Escribe tu nombre"
+max_length = 16
+alignment = 1
+select_all_on_focus = true
+
+[node name="NickError" type="Label" parent="Root/StartScreen/Columns/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.55, 0.5, 1)
+theme_override_font_sizes/font_size = 18
+text = ""
+horizontal_alignment = 1
+
+[node name="StartButton" type="Button" parent="Root/StartScreen/Columns/Box"]
+custom_minimum_size = Vector2(260, 56)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 30
+text = "Iniciar"
+
+[node name="LevelsLabel" type="Label" parent="Root/StartScreen/Columns/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.16, 0.3, 0.9)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 20
+text = "o elige un nivel:"
+horizontal_alignment = 1
+
+[node name="LevelButtons" type="HBoxContainer" parent="Root/StartScreen/Columns/Box"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="QuitButton" type="Button" parent="Root/StartScreen/Columns/Box"]
+custom_minimum_size = Vector2(260, 46)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 22
+text = "Salir"
+
+[node name="Controls" type="Label" parent="Root/StartScreen/Columns/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.85)
+theme_override_font_sizes/font_size = 16
+text = "WASD mover  -  Espacio saltar  -  Raton camara  -  P / Esc pausa  -  R reiniciar"
+horizontal_alignment = 1
+
+[node name="BoardPreview" type="PanelContainer" parent="Root/StartScreen/Columns"]
+custom_minimum_size = Vector2(440, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"HudPill"
+
+[node name="Box" type="VBoxContainer" parent="Root/StartScreen/Columns/BoardPreview"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BoardTitle" type="Label" parent="Root/StartScreen/Columns/BoardPreview/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.94, 0.55, 1)
+theme_override_colors/font_outline_color = Color(0.3, 0.2, 0.02, 0.9)
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 32
+text = "TABLA DE RECORDS"
+horizontal_alignment = 1
+
+[node name="Tabs" type="HBoxContainer" parent="Root/StartScreen/Columns/BoardPreview/Box"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="Rows" type="GridContainer" parent="Root/StartScreen/Columns/BoardPreview/Box"]
+custom_minimum_size = Vector2(0, 230)
+layout_mode = 2
+theme_override_constants/h_separation = 14
+theme_override_constants/v_separation = 6
+columns = 4
+
+[node name="Welcome" type="Label" parent="Root/StartScreen/Columns/BoardPreview/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 17
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="FullBoardButton" type="Button" parent="Root/StartScreen/Columns/BoardPreview/Box"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 20
+text = "Ver tabla completa"
+
+[node name="WinPanel" type="Panel" parent="Root"]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -215.0
+offset_right = 300.0
+offset_bottom = 215.0
+
+[node name="Box" type="VBoxContainer" parent="Root/WinPanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 24.0
+offset_right = -40.0
+offset_bottom = -24.0
+alignment = 1
+theme_override_constants/separation = 14
+
+[node name="WinTitle" type="Label" parent="Root/WinPanel/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.94, 0.55, 1)
+theme_override_colors/font_outline_color = Color(0.3, 0.2, 0.02, 0.9)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 48
+text = "FELICIDADES!"
+horizontal_alignment = 1
+
+[node name="WinText" type="Label" parent="Root/WinPanel/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="NextButton" type="Button" parent="Root/WinPanel/Box"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Siguiente nivel"
+
+[node name="WinMenuButton" type="Button" parent="Root/WinPanel/Box"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_type_variation = &"SecondaryButton"
+theme_override_font_sizes/font_size = 22
+text = "Menu de inicio"

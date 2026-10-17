@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://b587dakegopcv"
+path="res://.godot/imported/pillar_2x2x2.obj-514cd719edb116eb2cda5eb23d1feaee.mesh"
+
+[deps]
+
+files=["res://.godot/imported/pillar_2x2x2.obj-514cd719edb116eb2cda5eb23d1feaee.mesh"]
+
+source_file="res://assets/KayKit_Platformer_Pack_1.0_FREE/Assets/obj/neutral/pillar_2x2x2.obj"
+dest_files=["res://.godot/imported/pillar_2x2x2.obj-514cd719edb116eb2cda5eb23d1feaee.mesh", "res://.godot/imported/pillar_2x2x2.obj-514cd719edb116eb2cda5eb23d1feaee.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false
