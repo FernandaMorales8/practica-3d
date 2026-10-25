@@ -50,25 +50,6 @@ Ruta de la base: en Linux `~/.local/share/godot/app_userdata/IA/aventura.db`, en
 Windows `%APPDATA%\Godot\app_userdata\IA\aventura.db`. En la versión web se
 guarda en el almacenamiento del navegador (IndexedDB) de cada jugador.
 
-## Publicar en GitHub Pages
-
-1. Sube el proyecto a un repositorio de GitHub. La carpeta `.godot/` no se sube:
-   ya está en `.gitignore`.
-2. En el repositorio, ve a **Settings > Pages > Build and deployment > Source**
-   y elige **GitHub Actions**.
-3. Haz push a `main` (o `master`). El workflow `.github/workflows/publicar-web.yml`
-   descarga Godot 4.7.2, exporta con el preset "Web" y publica en
-   `https://<usuario>.github.io/<repositorio>/`.
-
-La exportación web va **sin hilos** (GitHub Pages no permite las cabeceras
-COOP/COEP) y **con soporte de extensiones**, que SQLite necesita.
-
-Para probarla en local:
-
-```bash
-godot --headless --path . --export-release "Web" build/web/index.html
-python3 -m http.server 8000 --directory build/web   # abre http://localhost:8000
-```
 
 ## Ventana
 
