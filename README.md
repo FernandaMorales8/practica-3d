@@ -60,3 +60,102 @@ proporción:
   `canvas_items` + `expand`).
 - En ventanas altas o estrechas la cámara abre su campo de visión horizontal
   para no dar sensación de zoom.
+
+## Game Feel / Juice (Práctica 5)
+
+Se implementaron cuatro elementos de *game feel* para hacer las acciones del
+jugador más responsivas, claras y satisfactorias, sin afectar las
+funcionalidades previas (base de datos, leaderboard, dashboard, modos de juego).
+
+### 1. Input Buffering
+
+Almacena temporalmente la acción de salto aunque el jugador presione el botón
+justo antes de tocar el suelo, ejecutándola en cuanto el personaje aterriza.
+
+| Parámetro | Valor | Descripción |
+|-----------|-------|-------------|
+| `jump_buffer_time` | **0.18 s** | Ventana de tiempo en que se guarda el salto anticipado |
+
+**Script:** `scripts/player.gd`
+**Comportamiento:** Si el jugador presiona Espacio hasta 0.18 s antes de
+aterrizar, el salto se ejecuta automáticamente al hacer contacto con el suelo.
+
+---
+
+### 2. Coyote Time
+
+Permite saltar durante un breve instante después de haber abandonado el borde
+de una plataforma, haciendo el control más perdonador sin alterar la física.
+
+| Parámetro | Valor | Descripción |
+|-----------|-------|-------------|
+| `coyote_time` | **0.18 s** | Tiempo tras dejar el suelo en que aún se puede saltar |
+
+**Script:** `scripts/player.gd`
+**Comportamiento:** Al separarse de una plataforma el contador `_coyote` se
+inicializa a 0.18 s y disminuye cada frame. Si el jugador salta antes de que
+llegue a 0, el salto se ejecuta normalmente.
+
+---
+
+### 3. Screenshake
+
+Vibración de cámara con sistema de *trauma* (0–1) que escala cuadráticamente,
+combinando desplazamiento y rotación con ruido de tiempo.
+
+| Parámetro | Valor | Descripción |
+|-----------|-------|-------------|
+| `trauma_decay` | **1.6 /s** | Velocidad de disminución del trauma por segundo |
+| `max_shake_offset` | **X 0.25 m, Y 0.22 m, Z 0.15 m** | Desplazamiento máximo de la cámara |
+| `max_shake_rot_deg` | **pitch 2°, yaw 2°, roll 3.5°** | Rotación máxima de la cámara |
+| `shake_frequency` | **36 Hz** | Frecuencia del ruido de vibración |
+
+**Intensidades de trauma por evento:**
+
+| Evento | Trauma añadido |
+|--------|---------------|
+| Muerte / caída al agua | 0.60 |
+| Tiempo agotado | 0.50 |
+| Rayo (lightning) | 0.55 |
+| Resorte (spring/bounce) | 0.30 |
+| Turbo (boost) | 0.25 |
+| Bloque rompible (crumble) | 0.20 |
+| Aterrizaje fuerte | 0.15–0.35 proporcional |
+| Todas las estrellas recogidas | 0.70 |
+
+**Scripts:** `scripts/camera_rig.gd` (método `add_trauma`),
+llamadas desde `scripts/main.gd` y `scripts/player.gd`.
+
+---
+
+### 4. Feedback Visual, Sonoro y de Interfaz
+
+#### Feedback Visual
+| Elemento | Evento |
+|----------|--------|
+| Flash rojo en pantalla | Daño, muerte, tiempo agotado, rayo, caída al agua |
+| Pulso dorado de estrellas en HUD | Recolección de estrella |
+| Sacudida de iconos de corazón | Pérdida de vida |
+| Burst de partículas 3D | Recolección de cualquier ítem |
+| Etiqueta flotante 3D | Recolección de ítem (sube y desaparece) |
+
+#### Feedback Sonoro
+| Sonido | Evento | Pitch variable |
+|--------|--------|----------------|
+| `sfx_jump` | Salto | Sí (±5 %) |
+| `sfx_land` | Aterrizaje fuerte | Sí (según velocidad) |
+| `sfx_hurt` | Daño / muerte | No |
+| `sfx_star` | Estrella recogida | Sí (sube con combo, hasta +50 %) |
+| `sfx_spring` | Resorte | No |
+| `sfx_boost` | Turbo | No |
+
+**Combo de estrellas:** recoger estrellas en menos de 2 s incrementa el pitch
+y al completar todas se añade screenshake máximo (trauma 0.70).
+
+---
+
+### Compatibilidad con funcionalidades previas
+
+Todos los elementos de *game feel* son aditivos y no modifican la lógica de
+física, colisiones, base de datos, leaderboard ni dashboard. Los parámetros
+se pueden ajustar desde el Inspector de Godot (`@export`) sin recompilar.
