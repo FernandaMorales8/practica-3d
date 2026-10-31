@@ -17,9 +17,9 @@ const Settings := preload("res://scripts/settings_manager.gd")
 const BASE_JOYSTICK_RADIUS := 90.0
 const BASE_HANDLE_RADIUS := 38.0
 const BASE_BUTTON_RADIUS := 54.0   # Diametro 108 px (cumple >= 96 px)
-const MARGIN_BOTTOM := 70.0
-const MARGIN_SIDE := 80.0
-const LOOK_SENSITIVITY := 0.0035
+const MARGIN_BOTTOM := 105.0      # Margen inferior comodo (no se corta en pantalla)
+const MARGIN_SIDE := 95.0         # Margen lateral comodo
+const LOOK_SENSITIVITY := 2.0     # Sensibilidad directa para giro de camara tactil
 
 # Indices multitouch (-1 = libre)
 var _stick_touch_id := -1
@@ -84,14 +84,13 @@ func _update_safe_area() -> void:
 		var view_size := get_viewport().get_visible_rect().size
 		var scale_x := view_size.x / float(window_size.x)
 		var scale_y := view_size.y / float(window_size.y)
-		_safe_insets = Rect2(
-			safe_rect.position.x * scale_x,
-			safe_rect.position.y * scale_y,
-			(window_size.x - safe_rect.end.x) * scale_x,
-			(window_size.y - safe_rect.end.y) * scale_y
-		)
+		var inset_left := maxf(safe_rect.position.x * scale_x, 0.0)
+		var inset_top := maxf(safe_rect.position.y * scale_y, 0.0)
+		var inset_right := maxf((window_size.x - safe_rect.end.x) * scale_x, 0.0)
+		var inset_bottom := maxf((window_size.y - safe_rect.end.y) * scale_y, 16.0)
+		_safe_insets = Rect2(inset_left, inset_top, inset_right, inset_bottom)
 	else:
-		_safe_insets = Rect2(0, 0, 0, 0)
+		_safe_insets = Rect2(0, 0, 0, 16.0)
 
 
 func _update_visibility() -> void:
@@ -261,7 +260,7 @@ func _handle_screen_touch(event: InputEventScreenTouch) -> void:
 				return
 
 		# 3. Comprobar zona de camara (mitad derecha, fuera de botones)
-		if pos.x >= view_size.x * 0.4 and pos.y > 70.0:
+		if pos.x >= view_size.x * 0.4 and pos.y > 60.0:
 			if _look_touch_id == -1 and _jump_touch_id != event.index:
 				_look_touch_id = event.index
 				return
@@ -293,6 +292,14 @@ func _handle_screen_drag(event: InputEventScreenDrag) -> void:
 		# Rotar la camara con el pulgar derecho
 		if _camera_rig != null and _camera_rig.has_method("rotate_yaw_relative"):
 			_camera_rig.rotate_yaw_relative(event.relative.x * LOOK_SENSITIVITY)
+	elif _look_touch_id == -1 and event.index != _stick_touch_id and event.index != _jump_touch_id:
+		var pos := event.position
+		var view_size := get_viewport().get_visible_rect().size
+		var jump_r := BASE_BUTTON_RADIUS * Settings.touch_scale
+		if pos.x >= view_size.x * 0.35 and pos.y > 60.0 and pos.distance_to(_jump_center) > jump_r * 1.2:
+			_look_touch_id = event.index
+			if _camera_rig != null and _camera_rig.has_method("rotate_yaw_relative"):
+				_camera_rig.rotate_yaw_relative(event.relative.x * LOOK_SENSITIVITY)
 
 
 func _update_stick_input(touch_pos: Vector2) -> void:

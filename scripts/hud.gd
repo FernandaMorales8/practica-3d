@@ -353,7 +353,14 @@ func pulse_stars() -> void:
 
 
 func set_hint(text: String) -> void:
+	# En dispositivos moviles o tabletas se oculta la leyenda de controles de PC
+	var is_mobile: bool = OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios") or (OS.has_feature("web") and DisplayServer.is_touchscreen_available())
+	if is_mobile:
+		_hint.text = ""
+		_hint.visible = false
+		return
 	_hint.text = text
+	_hint.visible = text != ""
 
 
 # Panel de felicitaciones al llegar a la meta. En el ultimo nivel el boton
