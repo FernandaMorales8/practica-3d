@@ -228,3 +228,13 @@ soporte tradicional de teclado, ratón y gamepad en PC.
 - **Base de datos SQLite y Leaderboard:** Todas las consultas locales, estadísticas, perfiles e historial se mantienen 100% funcionales.
 - **Game Feel y Efectos Visuales:** Screenshake, destellos de daño, partículas y audio con pitch adaptativo continúan operando con normalidad.
 - **Limitación documentada de la Interfaz Web Local:** El servidor de analíticas en Python (`tools/dashboard.py`) está pensado para ejecutarse en PC o en red local; en el dispositivo móvil, la consulta de records, tablas clasificatorias y tiempos de oro se realiza directamente a través de las pantallas integradas en el juego.
+
+---
+
+### Evidencias de la Práctica 6 (Capturas de Pantalla)
+
+Las 3 capturas solicitadas se encuentran disponibles en la carpeta `Captures/`:
+
+1. **Controles en juego:** [`Captures/Controll_P6.jpg`](Captures/Controll_P6.jpg) — Muestra el joystick virtual y el botón táctil de salto activos durante la partida.
+2. **Menú de ajustes táctiles:** [`Captures/HUD_Settings_P6.jpg`](Captures/HUD_Settings_P6.jpg) — Muestra el panel modal con los sliders de opacidad, tamaño, zona muerta y vibración háptica.
+3. **HUD en móvil:** [`Captures/HUD_P6.jpg`](Captures/HUD_P6.jpg) — Muestra la interfaz adaptada a pantalla táctil respetando los márgenes y sin leyendas de PC.
