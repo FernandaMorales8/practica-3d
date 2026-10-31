@@ -95,11 +95,14 @@ func _update_safe_area() -> void:
 
 
 func _update_visibility() -> void:
-	var is_mobile: bool = DisplayServer.is_touchscreen_available()
-	var should_show: bool = is_mobile or Settings.touch_debug
+	# Deteccion de dispositivo movil real (Android o iOS)
+	var is_mobile_os: bool = OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios")
+	# En PC permanece oculto por defecto para jugar limpiamente con teclado y raton.
+	# Solo se muestra si se activa el modo de depuracion en PC (tecla F1 o en el menu de Ajustes).
+	var should_show: bool = is_mobile_os or Settings.touch_debug
 	visible = should_show
 	set_process_input(should_show)
-	set_process_unhandled_input(should_show)
+	set_process_unhandled_input(true)
 
 
 func set_gameplay_active(active: bool) -> void:
@@ -501,6 +504,7 @@ func _build_settings_panel() -> void:
 
 func open_settings_panel() -> void:
 	if _settings_panel != null:
+		visible = true
 		_settings_panel.visible = true
 		_release_all_inputs()
 
@@ -509,4 +513,5 @@ func close_settings_panel() -> void:
 	if _settings_panel != null:
 		_settings_panel.visible = false
 	Settings.save_settings()
+	_update_visibility()
 	settings_closed.emit()
