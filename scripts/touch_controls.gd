@@ -95,11 +95,12 @@ func _update_safe_area() -> void:
 
 
 func _update_visibility() -> void:
-	# Deteccion de dispositivo movil real (Android o iOS)
+	# Deteccion de dispositivo movil nativo (Android o iOS) o navegador web en movil/tablet
 	var is_mobile_os: bool = OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios")
+	var is_mobile_web: bool = OS.has_feature("web") and DisplayServer.is_touchscreen_available()
 	# En PC permanece oculto por defecto para jugar limpiamente con teclado y raton.
 	# Solo se muestra si se activa el modo de depuracion en PC (tecla F1 o en el menu de Ajustes).
-	var should_show: bool = is_mobile_os or Settings.touch_debug
+	var should_show: bool = is_mobile_os or is_mobile_web or Settings.touch_debug
 	visible = should_show
 	set_process_input(should_show)
 	set_process_unhandled_input(true)
