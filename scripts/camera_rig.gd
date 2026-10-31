@@ -286,11 +286,16 @@ func _resolve_target() -> void:
 	_arm.add_excluded_object(_target.get_rid())
 
 
+func rotate_yaw_relative(dx: float) -> void:
+	if not look_enabled:
+		return
+	rotation.y -= dx * yaw_sensitivity
+	rotation.x = 0.0
+	rotation.z = 0.0
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not look_enabled:
 		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		rotation.y -= event.relative.x * yaw_sensitivity
-		# El horizonte se mantiene recto: nunca hay roll.
-		rotation.x = 0.0
-		rotation.z = 0.0
+		rotate_yaw_relative(event.relative.x)

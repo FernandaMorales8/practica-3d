@@ -22,10 +22,12 @@ _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 [display]
 
 window/size/viewport_height=864
+window/size/mode=3
 window/size/window_width_override=1080
 window/size/window_height_override=920
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+window/handheld/orientation=5
 
 [dotnet]
 
@@ -34,6 +36,10 @@ project/assembly_name="IA"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/godot_ai/plugin.cfg")
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
 
 [input]
 

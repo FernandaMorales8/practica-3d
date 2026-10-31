@@ -15,6 +15,7 @@ signal resume_pressed
 signal restart_pressed
 signal menu_pressed
 signal next_pressed
+signal controls_settings_pressed
 ## Pide filas para la tabla. target: "preview" (pantalla de inicio) o "full".
 ## tab: "1".."5" (nivel), "general" o "historial". view: "top" (desde el
 ## primero) o "cerca" (el jugador en el centro con sus rivales cercanos).
@@ -159,6 +160,18 @@ func _ready() -> void:
 	_pause_button.pressed.connect(pause_pressed.emit)
 	_resume_button.pressed.connect(resume_pressed.emit)
 	$Root/PausePanel/Box/RestartButton.pressed.connect(restart_pressed.emit)
+
+	# Boton para abrir ajustes de controles desde el menu de pausa
+	var ctrl_btn := Button.new()
+	ctrl_btn.name = "ControlsButton"
+	ctrl_btn.text = "Ajustes de controles"
+	ctrl_btn.custom_minimum_size = Vector2(0, 48)
+	ctrl_btn.theme_type_variation = &"SecondaryButton"
+	ctrl_btn.add_theme_font_size_override("font_size", 24)
+	ctrl_btn.pressed.connect(controls_settings_pressed.emit)
+	$Root/PausePanel/Box.add_child(ctrl_btn)
+	$Root/PausePanel/Box.move_child(ctrl_btn, $Root/PausePanel/Box/MenuButton.get_index())
+
 	$Root/PausePanel/Box/MenuButton.pressed.connect(menu_pressed.emit)
 	_next_button.pressed.connect(next_pressed.emit)
 	$Root/WinPanel/Box/WinMenuButton.pressed.connect(menu_pressed.emit)

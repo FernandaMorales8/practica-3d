@@ -11,6 +11,7 @@ signal died
 ## Ha tocado el agua: empieza a hundirse. `surface` es el punto del chapoteo.
 signal splashed(surface: Vector3)
 
+const Settings := preload("res://scripts/settings_manager.gd")
 const MESH_PATH := "res://assets/KayKit_Adventurers_2.0_FREE/Characters/gltf/Knight.glb"
 const ANIM_LIBS := [
 	"res://assets/KayKit_Adventurers_2.0_FREE/Animations/gltf/Rig_Medium/Rig_Medium_MovementBasic.glb",
@@ -247,6 +248,7 @@ func apply_turbo(seconds: float, direction: Vector3) -> bool:
 	if _turbo_trail != null:
 		_turbo_trail.emitting = true
 	_squash = 0.85
+	Settings.vibrate(Settings.VIB_BOOST_MS)
 	return true
 
 
@@ -265,6 +267,7 @@ func launch(speed_up: float) -> bool:
 	_was_on_floor = false
 	_squash = jump_stretch * 1.1
 	_burst_dust()
+	Settings.vibrate(Settings.VIB_BOOST_MS)
 	if _clip_jump_start != "":
 		_play_clip(_clip_jump_start, 0.05)
 	return true
@@ -275,6 +278,7 @@ func launch(speed_up: float) -> bool:
 func _on_jump() -> void:
 	_squash = jump_stretch
 	_burst_dust()
+	Settings.vibrate(Settings.VIB_JUMP_MS)
 	if _clip_jump_start != "":
 		_play_clip(_clip_jump_start, 0.08)
 

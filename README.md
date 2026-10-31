@@ -159,3 +159,72 @@ y al completar todas se añade screenshake máximo (trauma 0.70).
 Todos los elementos de *game feel* son aditivos y no modifican la lógica de
 física, colisiones, base de datos, leaderboard ni dashboard. Los parámetros
 se pueden ajustar desde el Inspector de Godot (`@export`) sin recompilar.
+
+---
+
+## Adaptación Móvil y Controles Táctiles (Práctica 6)
+
+Se adaptó el sistema de entrada para pantallas táctiles y dispositivos móviles
+(Android/iOS), permitiendo jugar de forma completamente táctil sin perder el
+soporte tradicional de teclado, ratón y gamepad en PC.
+
+### Parámetros de Configuración y Referencia
+
+| Parámetro | Valor de Referencia | Valor Implementado | Descripción |
+|-----------|---------------------|--------------------|-------------|
+| **Radio del joystick** | 80–120 px | **90 px base** (72–126 px con escala) | Radio del área de desplazamiento del stick |
+| **Zona muerta** | 0.15–0.25 | **0.20** (ajustable de 0.10 a 0.35) | Umbral antes de registrar movimiento |
+| **Tamaño mínimo de botones** | ≥ 96 px (≈ 9 mm) | **108 px base** (86–151 px con escala) | Diámetro del botón táctil de salto |
+| **Opacidad de controles** | 0.4–0.7 | **0.65** (ajustable de 0.20 a 1.00) | Nivel de transparencia de la interfaz táctil |
+| **Duración de vibración (Pickups)** | 30–80 ms | **40 ms** | Vibración háptica al recoger estrellas/ítems |
+| **Duración de vibración (Salto)** | 30–80 ms | **45 ms** | Vibración háptica al pulsar el botón de salto |
+| **Duración de vibración (Power/Gema)** | 30–80 ms | **65 ms** | Vibración háptica en resortes, turbos y gemas |
+| **Duración de vibración (Daño/Caída)** | 80–100 ms | **95 ms** | Vibración háptica al recibir daño, caer o morir |
+| **Orientación y stretch** | Landscape, canvas_items + expand | **Sensor Landscape**, `canvas_items` + `expand` | Orientación horizontal adaptable al sensor |
+
+---
+
+### Características de la Implementación Táctil
+
+1. **Joystick Virtual Ergonómico:**
+   - Ubicado en la esquina inferior izquierda, al alcance natural del pulgar izquierdo.
+   - Detecta toques en el cuadrante inferior izquierdo y permite control proporcional analógico.
+   - Convierte el desplazamiento en acciones del Input Map (`move_left`, `move_right`, `move_forward`, `move_back`) con fuerza variable (`Input.action_press(action, strength)`).
+
+2. **Botón Táctil de Acción (Salto):**
+   - Ubicado en la esquina inferior derecha con un diámetro de 108 px (cumple con holgura la norma de ≥ 96 px para el pulgar).
+   - Inyecta la acción `jump` en el Input Map con respuesta visual y vibración háptica inmediata.
+
+3. **Zona Táctil de Rotación de Cámara (Touch Look):**
+   - En la mitad superior y media derecha de la pantalla, arrastrar con el dedo permite girar la cámara en tercera persona (`yaw`), solucionando la ausencia de ratón en dispositivos móviles.
+
+4. **Soporte Multitouch Completo:**
+   - Cada toque registra y sigue su propio identificador (`event.index`), permitiendo mover el joystick con la mano izquierda mientras con la mano derecha se salta y se rota la cámara de manera fluida y simultánea.
+
+5. **Capa de Entrada Unificada:**
+   - El script del jugador (`scripts/player.gd`) lee exclusivamente acciones del Input Map mediante `Input.get_vector(...)` y `Input.is_action_just_pressed(...)`.
+   - Teclado (WASD/Espacio), Gamepad y Controles Táctiles conviven de forma armónica sin duplicar lógica de física.
+
+6. **Detección de Dispositivo y Modo de Depuración:**
+   - Los controles táctiles solo se muestran automáticamente si el dispositivo dispone de pantalla táctil (`DisplayServer.is_touchscreen_available()`).
+   - Para probar y depurar en PC, se incluye la tecla rápida **F1** o el toggle en el menú de ajustes para forzar la visualización táctil con emulación de ratón (`emulate_touch_from_mouse=true`).
+
+7. **Adaptación de Pantalla y Safe Area:**
+   - Detecta las áreas seguras de la pantalla (`DisplayServer.get_display_safe_area()`) y calcula los insets para que los botones y el joystick no queden cortados por *notches*, cámaras frontales o barras de navegación de Android/iOS.
+
+8. **Integración con Game Feel:**
+   - El **Input Buffering** (0.18 s) y el **Coyote Time** (0.18 s) funcionan de manera transparente con los toques táctiles.
+   - Retroalimentación háptica mediante `Input.vibrate_handheld(ms)` en eventos clave, configurable on/off.
+
+9. **Panel de Ajustes de Controles en Tiempo Real:**
+   - Accesible tanto desde el botón **⚙ Controles** en pantalla como desde el menú de pausa (**Ajustes de controles**).
+   - Permite regular sliders de opacidad, tamaño, zona muerta, vibración háptica y modo de depuración PC.
+   - Guarda automáticamente las preferencias del usuario en `user://settings.cfg`.
+
+---
+
+### Verificación y Compatibilidad
+
+- **Base de datos SQLite y Leaderboard:** Todas las consultas locales, estadísticas, perfiles e historial se mantienen 100% funcionales.
+- **Game Feel y Efectos Visuales:** Screenshake, destellos de daño, partículas y audio con pitch adaptativo continúan operando con normalidad.
+- **Limitación documentada de la Interfaz Web Local:** El servidor de analíticas en Python (`tools/dashboard.py`) está pensado para ejecutarse en PC o en red local; en el dispositivo móvil, la consulta de records, tablas clasificatorias y tiempos de oro se realiza directamente a través de las pantallas integradas en el juego.

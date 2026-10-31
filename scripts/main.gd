@@ -18,6 +18,8 @@ const LevelBuilderScript := preload("res://scripts/level_builder.gd")
 const SceneryScript := preload("res://scripts/scenery.gd")
 const DbScript := preload("res://scripts/leaderboard_db.gd")
 const LevelDataScript := preload("res://scripts/level_data.gd")
+const Settings := preload("res://scripts/settings_manager.gd")
+const TouchControlsScript := preload("res://scripts/touch_controls.gd")
 
 const START_LIVES := 3
 ## Los corazones pueden subir las vidas hasta aqui.
@@ -92,6 +94,7 @@ const PROGRESS_PATH := "user://progreso.cfg"
 @onready var _hud = $HUD
 @onready var _level_root: Node3D = $LevelRoot
 
+var _touch_controls: CanvasLayer = null
 var _level_index := 0
 var _lives := START_LIVES
 var _stars := 0
@@ -192,6 +195,13 @@ func _ready() -> void:
 	_hud.restart_pressed.connect(_on_restart_pressed)
 	_hud.menu_pressed.connect(_show_start_screen)
 	_hud.next_pressed.connect(_on_next_pressed)
+	_hud.controls_settings_pressed.connect(_on_controls_settings_pressed)
+
+	_touch_controls = TouchControlsScript.new()
+	_touch_controls.name = "TouchControls"
+	add_child(_touch_controls)
+	_touch_controls.set_camera_rig(get_node_or_null("CameraYaw"))
+
 	# El primer nivel se construye de fondo y queda congelado tras el menu. Con
 	# _in_menu activo no cuenta como intento.
 	_in_menu = true
@@ -355,6 +365,8 @@ func _start_level(index: int) -> void:
 	# La celebracion congela al jugador; aqui se le devuelve el control.
 	_player.set_physics_process(true)
 	_set_paused(false)
+	if _touch_controls != null:
+		_touch_controls.set_gameplay_active(not _in_menu)
 
 	if _trial:
 		var trial_number := _level_index - LevelDataScript.CAMPAIGN_LEVELS + 1
@@ -598,6 +610,7 @@ func _on_pickup_collected(kind: String, node: Node) -> void:
 			_star_combo_time = 1.8
 			var pitch := 1.0 + minf(_star_combo * 0.06, 0.48)
 			play_sfx("star", 0.0, pitch)
+			Settings.vibrate(Settings.VIB_PICKUP_MS)
 			_star_combo += 1
 			_hud.set_stars(_stars, _star_total)
 			_hud.pulse_stars()
@@ -607,6 +620,7 @@ func _on_pickup_collected(kind: String, node: Node) -> void:
 		"heart":
 			_hearts_taken += 1
 			play_sfx("heart", 0.0, 1.05)
+			Settings.vibrate(Settings.VIB_PICKUP_MS)
 			if _lives < MAX_LIVES:
 				_lives += 1
 				_hud.set_lives(_lives, maxi(START_LIVES, _lives))
@@ -616,20 +630,24 @@ func _on_pickup_collected(kind: String, node: Node) -> void:
 		"gem":
 			_gem_found = true
 			play_sfx("gem", 2.0, 1.1)
+			Settings.vibrate(Settings.VIB_BOOST_MS)
 			_camera_trauma(0.35)
 			_hud.set_gem(true)
 			_hud.show_banner("GEMA SECRETA", 1.6)
 		"power":
 			_powers_taken += 1
 			play_sfx("power", 0.0, 1.05)
+			Settings.vibrate(Settings.VIB_BOOST_MS)
 			_camera_trauma(0.25)
 			_player.apply_boost(POWER_SECONDS)
 			_hud.show_message("¡Super salto!  Salta mucho mas alto", 1.8)
 		"time":
 			play_sfx("time", 0.0, 1.05)
+			Settings.vibrate(Settings.VIB_PICKUP_MS)
 			_add_time(float(_level_data.get("time_bonus", 3.0)), node.global_position)
 		"checkpoint":
 			play_sfx("checkpoint")
+			Settings.vibrate(Settings.VIB_PICKUP_MS)
 			_checkpoints_taken += 1
 			_spawn_point = node.global_position + Vector3(0, 0.6, 0)
 			_hud.show_message("Checkpoint", 1.0)
@@ -716,6 +734,8 @@ func _on_goal_reached() -> void:
 
 	_win_open = true
 	get_tree().paused = true
+	if _touch_controls != null:
+		_touch_controls.set_gameplay_active(false)
 	_set_camera_look(false)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
@@ -737,6 +757,7 @@ func _on_player_died() -> void:
 	# la senal, asi que sonaria dos veces si estuviera en los dos sitios.
 	play_sfx("death", -4.0)
 	play_sfx("hurt", -2.0, randf_range(0.85, 0.95))
+	Settings.vibrate(Settings.VIB_DAMAGE_MS)
 	_camera_trauma(0.8)
 	_hud.show_damage_flash(0.6)
 	_log_death()
@@ -846,6 +867,7 @@ func _on_time_out() -> void:
 	_timed_out = true
 	_timer_running = false
 	play_sfx("timeout")
+	Settings.vibrate(Settings.VIB_DAMAGE_MS)
 	_camera_trauma(0.85)
 	_hud.show_banner("¡SE ACABO EL TIEMPO!", 1.4)
 	_hud.flash(0.3)
@@ -880,6 +902,7 @@ func _lightning() -> void:
 	var env_node := get_node_or_null("WorldEnvironment") as WorldEnvironment
 	_hud.flash(randf_range(0.25, 0.45))
 	_camera_trauma(0.6)
+	Settings.vibrate(Settings.VIB_BOOST_MS)
 	if sun != null:
 		var tween := create_tween()
 		tween.tween_property(sun, "light_energy", 3.5, 0.04)
@@ -902,6 +925,7 @@ func _lightning() -> void:
 func _on_player_splashed(_surface: Vector3) -> void:
 	play_sfx("splash")
 	play_sfx("hurt", -3.0, randf_range(0.95, 1.05))
+	Settings.vibrate(Settings.VIB_DAMAGE_MS)
 	_camera_trauma(0.7)
 	_hud.show_damage_flash(0.45)
 	_hud.set_underwater(true)
@@ -1074,6 +1098,9 @@ func _set_paused(value: bool) -> void:
 	get_tree().paused = value
 	_hud.set_paused(value)
 
+	if _touch_controls != null:
+		_touch_controls.set_gameplay_active(not value and not _in_menu)
+
 	_set_camera_look(not value)
 
 	# Con el menu abierto (nivel de fondo) el raton sigue libre.
@@ -1103,8 +1130,15 @@ func _show_start_screen() -> void:
 	get_tree().paused = true
 	_hud.set_paused(false)
 	_hud.set_start_screen(true)
+	if _touch_controls != null:
+		_touch_controls.set_gameplay_active(false)
 	_set_camera_look(false)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
+func _on_controls_settings_pressed() -> void:
+	if _touch_controls != null:
+		_touch_controls.open_settings_panel()
 
 
 func _on_start_pressed() -> void:
